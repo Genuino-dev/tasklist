@@ -1,9 +1,17 @@
 import { TaskCard } from "@/components/TaskCard";
 import { TaskForm } from "@/components/TaskForm";
-import { Box, Divider, Flex, HStack, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Divider,
+  Flex,
+  HStack,
+  Stack,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
 import React from "react";
 import { ChangeEvent, useState } from "react";
-import { AlertIcon, AlertIconComponent } from "@/components/AlertIcon";
+import { AlertIconComponent } from "@/components/AlertIcon";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -16,15 +24,25 @@ interface TaskProps {
 function App() {
   const [tasks, setTasks] = useState<TaskProps[]>([]);
   const [taskInput, setTaskInput] = useState("");
-
   const openTasks = tasks.filter((task) => !task.status);
   const completedTasks = tasks.filter((task) => task.status);
+  const toast = useToast();
 
   const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
     setTaskInput(e.currentTarget.value);
   };
 
   const handleCreateTask = () => {
+    if (taskInput.trim() === "") {
+      return toast({
+        title: "Erro ao criar tarefa.",
+        description: "O campo não pode estar vazio.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top-right",
+      });
+    }
     const newTask = { id: uuidv4(), label: taskInput, status: false };
     setTasks((tarefas) => [...tarefas, newTask]);
     setTaskInput("");
@@ -36,9 +54,7 @@ function App() {
 
   const handleTaskCompletada = (id: string) => {
     setTasks((tarefas) =>
-      tarefas.map((task) =>
-        task.id === id ? { ...task, status: true } : task
-      )
+      tarefas.map((task) => (task.id === id ? { ...task, status: true } : task))
     );
   };
 
@@ -66,7 +82,6 @@ function App() {
       />
     ));
   };
-  
 
   return (
     <Stack w="full" h="100vh" alignItems="center" flexDirection="column" p={10}>
